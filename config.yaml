@@ -1,0 +1,82 @@
+# Configuración del pipeline de preprocesamiento.
+# Regla de trabajo: cualquier cambio en este archivo se commitea ANTES de ejecutar,
+# así cada ejecución queda asociada a un commit concreto (ver informe.json).
+
+input_path: data/raw/dataset_comentarios.csv
+output_dir: runs
+
+columns:
+  text: text            # nombre de la columna con el comentario original
+
+# Marcadores que sustituyen a URLs, menciones, etc.
+# Si usas pysentimiento/robertuito, ellos esperan "url" y "@usuario":
+# cámbialos aquí para que coincidan con el preprocesado del modelo.
+placeholders:
+  url: "<URL>"
+  mention: "<USUARIO>"
+  email: "<EMAIL>"
+  phone: "<TELEFONO>"
+
+dedup:
+  min_chars: 20               # textos más cortos NO se deduplican ("Verdad", "Excelente")
+  near_dup_threshold: 0.85    # similitud de Jaccard para casi-duplicados (0-1)
+  num_perm: 128               # permutaciones MinHash (más = más preciso y más lento)
+  shingle_size: 3             # n-gramas de palabras
+  seed: 42
+  keep: most_liked            # most_liked | earliest (qué copia se conserva)
+  scope: global               # global | per_video
+
+spam:
+  drop_threshold: 3           # se descarta si spam_score >= este valor
+  drop_coordinated: false     # true = descartar también todo lo marcado como "coordinado"
+  coordinated_min_cluster: 5  # mensaje repetido (o casi) al menos N veces...
+  coordinated_min_videos: 3   # ...en al menos M vídeos distintos
+  max_mentions: 5
+  max_hashtags: 5
+  weights:
+    url: 1
+    multiple_urls: 1
+    contact: 2                # teléfono o email
+    spam_keywords: 2
+    many_spam_keywords: 1
+    many_mentions: 1
+    many_hashtags: 1
+    char_run: 1               # 15+ veces el mismo carácter seguido
+    fancy_unicode: 1          # letras "decorativas" 𝗮𝘀í para evadir filtros
+    low_unique_chars: 1
+    coordinated: 2
+  # Frases claras de spam. REVISA descartados.csv y ajusta según tu corpus:
+  # palabras genéricas ("inversión", "gratis") darían falsos positivos en política.
+  keywords:
+    - gana dinero
+    - ganar dinero
+    - ganancias diarias
+    - ingresos pasivos
+    - forex
+    - trading
+    - whatsapp
+    - telegram
+    - escribeme
+    - contactame
+    - mi canal
+    - suscribete
+    - sub a sub
+    - sorteo
+    - click aqui
+    - clic aqui
+    - link en mi
+    - recuperar tu cuenta
+    - casino
+    - apuestas
+    - hacker
+    - prestamo rapido
+    - mira mi video
+    - visita mi
+    - mi perfil
+
+language:
+  keep: [es]
+  candidates: [es, en, pt, fr, it, de, ca]
+  min_confidence: 0.60
+  min_letters: 15             # con menos letras la detección no es fiable
+  undetermined_policy: keep   # keep | drop (para textos cortos, p. ej. "Viva Ecuador!")

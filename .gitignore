@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+
+# Datos: no se versionan (peso, términos de uso de YouTube y RGPD)
+data/
+runs/*/comentarios_limpios.*
+runs/*/descartados.*
+# SÍ se versionan: runs/*/informe.json, embudo.csv y config_usada.yaml

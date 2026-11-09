@@ -1,0 +1,9 @@
+pandas>=2.0
+numpy>=1.24
+datasketch>=1.6
+lingua-language-detector>=2.0
+emoji>=2.8
+PyYAML>=6.0
+tqdm>=4.66
+pyarrow>=14.0      # opcional: guarda también .parquet
+pytest>=7.4        # para los tests
